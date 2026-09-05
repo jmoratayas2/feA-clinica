@@ -1,0 +1,19 @@
+<div class="sidebar-header">
+  <mat-icon class="sidebar-logo">local_hospital</mat-icon>
+  <span class="sidebar-brand">Clínicas UMG</span>
+</div>
+
+<mat-divider />
+
+<mat-nav-list>
+  @for (item of visibleItems; track item.route) {
+    <a mat-list-item
+       [routerLink]="item.route"
+       routerLinkActive="active-link"
+       [routerLinkActiveOptions]="{ exact: item.route === '/home' }"
+       (click)="closeSidenav.emit()">
+      <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+      <span matListItemTitle>{{ item.label }}</span>
+    </a>
+  }
+</mat-nav-list>

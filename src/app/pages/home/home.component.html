@@ -1,0 +1,21 @@
+<div class="home-header">
+  <h1>Bienvenido, <span class="username-highlight">{{ auth.currentUser() }}</span></h1>
+  <p class="subtitle">Panel de administración &mdash; Sistema de Clínicas UMG</p>
+</div>
+
+<div class="cards-grid">
+  @for (card of visibleCards; track card.label) {
+    <mat-card class="module-card" [style.border-top-color]="card.color">
+      <mat-card-content class="card-content">
+        <div class="card-icon-wrap" [style.background-color]="card.color + '1A'">
+          <mat-icon [style.color]="card.color">{{ card.icon }}</mat-icon>
+        </div>
+        <span class="card-label">{{ card.label }}</span>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @empty {
+    <p class="no-modules">No tiene módulos disponibles con su perfil actual.</p>
+  }
+</div>

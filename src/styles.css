@@ -1,0 +1,59 @@
+/* ============================================================
+   Angular Material Theme — Prebuilt Indigo/Pink
+   ============================================================ */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+/* ============================================================
+   Google Fonts: Inter (loaded via index.html)
+   ============================================================ */
+
+/* ============================================================
+   Global Reset & Base
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  background-color: #f5f6fa;
+  color: #1a1a2e;
+}
+
+/* ============================================================
+   Utility classes
+   ============================================================ */
+.flex-spacer {
+  flex: 1 1 auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }
+
+/* ============================================================
+   Material overrides
+   ============================================================ */
+.mat-mdc-card {
+  border-radius: 12px !important;
+}
+
+.mat-mdc-raised-button.mat-primary {
+  border-radius: 8px !important;
+}
+
+/* Table hover */
+.mat-mdc-row:hover {
+  background-color: #eef1fb !important;
+  transition: background-color 0.15s ease;
+}

@@ -1,0 +1,32 @@
+<mat-toolbar color="primary" class="app-navbar">
+
+  <!-- Botón de menú (hamburguesa) -->
+  <button mat-icon-button (click)="menuToggle.emit()" aria-label="Abrir menú">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- Título -->
+  <span class="navbar-title">Sistema de Clínicas</span>
+
+  <span class="flex-spacer"></span>
+
+  <!-- Usuario y menú de opciones -->
+  <button mat-button [matMenuTriggerFor]="userMenu" class="user-btn">
+    <mat-icon>account_circle</mat-icon>
+    <span class="username">{{ auth.currentUser() }}</span>
+    <mat-icon>arrow_drop_down</mat-icon>
+  </button>
+
+  <mat-menu #userMenu="matMenu">
+    <button mat-menu-item disabled>
+      <mat-icon>person</mat-icon>
+      <span>{{ auth.currentUser() }}</span>
+    </button>
+    <mat-divider />
+    <button mat-menu-item (click)="onLogout()">
+      <mat-icon>logout</mat-icon>
+      <span>Cerrar sesión</span>
+    </button>
+  </mat-menu>
+
+</mat-toolbar>
