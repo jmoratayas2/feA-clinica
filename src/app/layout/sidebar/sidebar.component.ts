@@ -1,17 +1,12 @@
-import { Component, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Output, EventEmitter, inject, OnInit, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatListModule }   from '@angular/material/list';
 import { MatIconModule }   from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 
 import { AuthService } from '../../core/services/auth.service';
-
-interface NavItem {
-  label:      string;
-  icon:       string;
-  route:      string;
-  permission: string | null;  // null = siempre visible
-}
+import { MenuService } from '../../core/services/menu.service';
+import { MenuModulo } from '../../models/menu/menu-modulo.model';
 
 @Component({
   selector: 'app-sidebar',
@@ -26,27 +21,50 @@ interface NavItem {
   templateUrl: './sidebar.component.html',
   styleUrl:    './sidebar.component.css'
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   @Output() closeSidenav = new EventEmitter<void>();
 
   auth = inject(AuthService);
+  private menuService = inject(MenuService);
 
-  /** Ítems del menú — permisos verificados contra PacienteController y CatalogosController */
-  readonly navItems: NavItem[] = [
-    { label: 'Inicio',         icon: 'home',           route: '/home',       permission: null },
-    { label: 'Pacientes',      icon: 'people',          route: '/pacientes',  permission: 'PACIENTE_READ' },
-    { label: 'Médicos',        icon: 'medical_services',route: '/medicos',    permission: 'MEDICO_READ' },
-    { label: 'Clínicas',       icon: 'local_hospital',  route: '/clinicas',   permission: 'CLINICA_READ' },
-    { label: 'Citas',          icon: 'event',           route: '/citas',      permission: 'CITA_READ' },
-    { label: 'Consultas',      icon: 'assignment',      route: '/consultas',  permission: 'CONSULTA_READ' },
-    { label: 'Especialidades', icon: 'school',          route: '/especialidades', permission: 'ESPECIALIDAD_READ' },
-    { label: 'Medicamentos',   icon: 'medication',      route: '/medicamentos',   permission: 'MEDICAMENTO_READ' },
-  ];
+  /** Módulos obtenidos dinámicamente desde el backend según los accesos del usuario */
+  menuItems = signal<MenuModulo[]>([]);
 
-  /** Devuelve solo los ítems que el usuario tiene permiso de ver. */
-  get visibleItems(): NavItem[] {
-    return this.navItems.filter(item =>
-      item.permission === null || this.auth.hasPermission(item.permission)
-    );
+  /** Control de expansión de módulos padre con hijos */
+  expandedModulos = signal<Record<number, boolean>>({});
+
+  ngOnInit(): void {
+    this.cargarMenu();
+  }
+
+  cargarMenu(): void {
+    this.menuService.getMenu().subscribe({
+      next: (modulos) => {
+        this.menuItems.set(modulos);
+        // Expandir por defecto módulos con hijos
+        const expandMap: Record<number, boolean> = {};
+        modulos.forEach(m => {
+          if (m.submodulos && m.submodulos.length > 0) {
+            expandMap[m.idModulo] = true;
+          }
+        });
+        this.expandedModulos.set(expandMap);
+      },
+      error: (err) => {
+        console.error('Error al obtener módulos del menú:', err);
+      }
+    });
+  }
+
+  toggleExpand(idModulo: number): void {
+    const current = this.expandedModulos();
+    this.expandedModulos.set({
+      ...current,
+      [idModulo]: !current[idModulo]
+    });
+  }
+
+  isExpanded(idModulo: number): boolean {
+    return !!this.expandedModulos()[idModulo];
   }
 }

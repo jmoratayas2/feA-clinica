@@ -6,14 +6,53 @@
 <mat-divider />
 
 <mat-nav-list>
-  @for (item of visibleItems; track item.route) {
-    <a mat-list-item
-       [routerLink]="item.route"
-       routerLinkActive="active-link"
-       [routerLinkActiveOptions]="{ exact: item.route === '/home' }"
-       (click)="closeSidenav.emit()">
-      <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-      <span matListItemTitle>{{ item.label }}</span>
-    </a>
+  <!-- Enlace Inicio siempre presente -->
+  <a mat-list-item
+     routerLink="/home"
+     routerLinkActive="active-link"
+     [routerLinkActiveOptions]="{ exact: true }"
+     (click)="closeSidenav.emit()">
+    <mat-icon matListItemIcon>home</mat-icon>
+    <span matListItemTitle>Inicio</span>
+  </a>
+
+  <!-- Módulos cargados dinámicamente desde el backend -->
+  @for (item of menuItems(); track item.idModulo) {
+    @if (item.submodulos && item.submodulos.length > 0) {
+      <!-- Módulo Padre con jerarquía de submódulos -->
+      <div class="menu-parent-block">
+        <div class="menu-parent-header" (click)="toggleExpand(item.idModulo)">
+          <mat-icon class="menu-parent-icon">{{ item.icono || 'folder' }}</mat-icon>
+          <span class="menu-parent-title">{{ item.nombre }}</span>
+          <mat-icon class="expand-icon">
+            {{ isExpanded(item.idModulo) ? 'expand_less' : 'expand_more' }}
+          </mat-icon>
+        </div>
+
+        @if (isExpanded(item.idModulo)) {
+          <div class="submodulos-container">
+            @for (sub of item.submodulos; track sub.idModulo) {
+              <a mat-list-item
+                 [routerLink]="sub.ruta"
+                 routerLinkActive="active-link"
+                 (click)="closeSidenav.emit()"
+                 class="submodulo-item">
+                <mat-icon matListItemIcon>{{ sub.icono || 'subdirectory_arrow_right' }}</mat-icon>
+                <span matListItemTitle>{{ sub.nombre }}</span>
+              </a>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Módulo estándar individual -->
+      <a mat-list-item
+         [routerLink]="item.ruta"
+         routerLinkActive="active-link"
+         (click)="closeSidenav.emit()">
+        <mat-icon matListItemIcon>{{ item.icono || 'folder' }}</mat-icon>
+        <span matListItemTitle>{{ item.nombre }}</span>
+      </a>
+    }
   }
 </mat-nav-list>

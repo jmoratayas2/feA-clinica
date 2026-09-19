@@ -1,59 +1,79 @@
-# ClinicasFrontend
+# Frontend Clínicas UMG (`feA-clinica`)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.7.
+Aplicación web Single Page Application (SPA) desarrollada con **Angular 22** y **Angular Material** para el sistema de gestión de clínicas médicas.
 
-## Development server
+---
 
-To start a local development server, run:
+## 🚀 Características Principales
+
+- **Autenticación con JWT:** Integración con `security-clinic` (puerto 8081). Gestión de sesión reactiva mediante Signals, almacenamiento seguro en `sessionStorage` e interceptor HTTP automático (`auth.interceptor.ts`).
+- **Menú Dinámico por Accesos (Serie II):** Menú lateral de navegación construido 100% dinámicamente desde el backend (`GET /api/security/usuarios/me/menu`) a través de `MenuService`.
+  - Soporte de **jerarquía padre/hijo** con acordeón expandible para submódulos.
+  - Uso de íconos dinámicos de **Material Design**.
+  - Control de apertura y cierre mediante botón tipo **hamburguesa**.
+  - Sin módulos estáticos o hardcodeados para simular permisos.
+- **Gestión de Pacientes con Paginación Real:** Consumo de `/api/v1/pacientes` en `clinicaBK` con filtros dinámicos y paginación en base de datos.
+- **Protección de Rutas:** Guardias de navegación funcionales (`authGuard`, `permissionGuard`).
+- **Notificaciones Modernas:** Alertas interactivas mediante SweetAlert2.
+
+---
+
+## 📋 Requisitos
+
+- Node.js 20 o superior.
+- npm 10+.
+- Angular CLI 22 (`npm install -g @angular/cli`).
+
+---
+
+## ⚙️ Configuración de Entornos (`src/environments/environment.ts`)
+
+```typescript
+export const environment = {
+  production: false,
+  securityApiUrl: 'http://localhost:8081', // Microservicio de Seguridad
+  clinicApiUrl:   'http://localhost:8080'  // Microservicio de Negocio Clínico
+};
+```
+
+---
+
+## 💻 Comandos de Desarrollo
 
 ```bash
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo en http://localhost:4200/
+npm start
+# o
 ng serve
+
+# Compilar para producción (carpeta dist/)
+npm run build
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## 📁 Estructura del Proyecto
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
 ```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
+src/app/
+├── core/
+│   ├── guards/          # authGuard, permissionGuard
+│   ├── interceptors/    # auth.interceptor (agrega Authorization: Bearer <JWT>)
+│   └── services/        # auth.service, menu.service, token.service, notification.service
+├── layout/
+│   ├── main-layout/     # Sidenav container con toggle responsivo
+│   ├── navbar/          # Barra superior con botón hamburguesa y logout
+│   └── sidebar/         # Menú lateral dinámico con soporte de submódulos
+├── models/
+│   ├── auth/            # Modelos de login y credenciales
+│   ├── menu/            # MenuModulo (jerarquía padre/hijo)
+│   └── paciente/        # Paciente, filtros y paginación
+└── pages/
+    ├── auth/            # Vista de Login
+    ├── home/            # Dashboard inicial
+    ├── pacientes/       # Lista paginada, formulario y detalle
+    └── unauthorized/    # Error 403
 ```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

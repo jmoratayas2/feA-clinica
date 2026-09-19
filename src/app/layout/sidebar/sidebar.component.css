@@ -52,3 +52,56 @@ mat-nav-list mat-icon {
 mat-divider {
   border-top-color: rgba(255,255,255,0.15) !important;
 }
+
+/* Estilos de módulos padre / submódulos */
+.menu-parent-block {
+  margin: 4px 8px;
+}
+
+.menu-parent-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #e8eaf6;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.menu-parent-header:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.menu-parent-icon {
+  color: #90caf9 !important;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.menu-parent-title {
+  flex: 1;
+}
+
+.expand-icon {
+  color: #c5cae9 !important;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.submodulos-container {
+  padding-left: 12px;
+  border-left: 2px solid rgba(144, 202, 249, 0.3);
+  margin-left: 16px;
+  margin-top: 2px;
+  margin-bottom: 6px;
+}
+
+.submodulo-item {
+  margin: 1px 0 !important;
+  font-size: 0.88rem !important;
+}
