@@ -3,7 +3,13 @@
   flex-direction: column;
   height: 100%;
   background-color: #283593;
-  color: white;
+  color: #ffffff;
+
+  /* Variables CSS de MDC para Angular Material */
+  --mdc-list-list-item-label-text-color: #ffffff;
+  --mdc-list-list-item-supporting-text-color: #e8eaf6;
+  --mdc-list-list-item-leading-icon-color: #90caf9;
+  --mat-list-active-indicator-color: rgba(255, 255, 255, 0.15);
 }
 
 .sidebar-header {
@@ -21,36 +27,62 @@
 }
 
 .sidebar-brand {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #e8eaf6;
-  letter-spacing: 0.3px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.4px;
 }
 
-/* Links del sidebar en blanco */
-mat-nav-list a {
-  color: #c5cae9 !important;
-  border-radius: 8px;
-  margin: 2px 8px;
+/* Forzar texto en blanco puro en todos los items de Angular Material */
+:host ::ng-deep .mat-mdc-list-item-title,
+:host ::ng-deep [matListItemTitle],
+:host ::ng-deep .mdc-list-item__primary-text,
+:host ::ng-deep .mat-mdc-list-item-unscoped-content {
+  color: #ffffff !important;
+  font-size: 0.93rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
 }
 
-mat-nav-list a:hover {
-  background-color: rgba(255,255,255,0.08) !important;
-  color: white !important;
+:host ::ng-deep .mat-mdc-list-item:hover .mat-mdc-list-item-title,
+:host ::ng-deep .mat-mdc-list-item:hover [matListItemTitle],
+:host ::ng-deep .mat-mdc-list-item:hover .mdc-list-item__primary-text {
+  color: #ffffff !important;
 }
 
-mat-nav-list a.active-link {
-  background-color: rgba(255,255,255,0.15) !important;
-  color: white !important;
-  font-weight: 600;
+:host ::ng-deep .mat-mdc-list-item.active-link .mat-mdc-list-item-title,
+:host ::ng-deep .mat-mdc-list-item.active-link [matListItemTitle],
+:host ::ng-deep .mat-mdc-list-item.active-link .mdc-list-item__primary-text {
+  color: #ffffff !important;
+  font-weight: 700;
 }
 
-mat-nav-list mat-icon {
+:host ::ng-deep mat-icon[matListItemIcon],
+:host ::ng-deep .mat-mdc-list-item mat-icon {
   color: #90caf9 !important;
 }
 
+/* Links del sidebar */
+mat-nav-list a {
+  color: #ffffff !important;
+  border-radius: 8px;
+  margin: 2px 8px;
+  transition: background-color 0.2s ease;
+}
+
+mat-nav-list a:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+mat-nav-list a.active-link {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
 mat-divider {
-  border-top-color: rgba(255,255,255,0.15) !important;
+  border-top-color: rgba(255, 255, 255, 0.18) !important;
 }
 
 /* Estilos de módulos padre / submódulos */
@@ -65,29 +97,33 @@ mat-divider {
   padding: 10px 16px;
   border-radius: 8px;
   cursor: pointer;
-  color: #e8eaf6;
+  color: #ffffff;
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: background-color 0.2s ease;
 }
 
 .menu-parent-header:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.12);
 }
 
 .menu-parent-icon {
   color: #90caf9 !important;
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
 }
 
 .menu-parent-title {
   flex: 1;
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.2px;
 }
 
 .expand-icon {
-  color: #c5cae9 !important;
+  color: #e8eaf6 !important;
   font-size: 20px;
   width: 20px;
   height: 20px;
@@ -95,13 +131,13 @@ mat-divider {
 
 .submodulos-container {
   padding-left: 12px;
-  border-left: 2px solid rgba(144, 202, 249, 0.3);
+  border-left: 2px solid rgba(144, 202, 249, 0.4);
   margin-left: 16px;
   margin-top: 2px;
   margin-bottom: 6px;
 }
 
 .submodulo-item {
-  margin: 1px 0 !important;
-  font-size: 0.88rem !important;
+  margin: 2px 0 !important;
+  font-size: 0.9rem !important;
 }

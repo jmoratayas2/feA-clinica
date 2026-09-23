@@ -65,6 +65,25 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/pacientes/paciente-form/paciente-form.component').then(m => m.PacienteFormComponent)
       },
+
+      // Seguridad - Gestión de Usuarios y Accesos
+      {
+        path: 'seguridad/usuarios',
+        canActivate: [permissionGuard],
+        data: { permission: 'USUARIO_READ' },
+        loadComponent: () =>
+          import('./pages/seguridad/usuario-list/usuario-list.component').then(m => m.UsuarioListComponent)
+      },
+      {
+        path: 'seguridad',
+        redirectTo: 'seguridad/usuarios',
+        pathMatch: 'full'
+      },
+      {
+        path: 'usuarios',
+        redirectTo: 'seguridad/usuarios',
+        pathMatch: 'full'
+      },
     ]
   },
 

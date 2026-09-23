@@ -57,3 +57,24 @@ html, body {
   background-color: #eef1fb !important;
   transition: background-color 0.15s ease;
 }
+
+/* ============================================================
+   Sidebar Dark Theme overrides (High Contrast White Text)
+   ============================================================ */
+.app-sidenav {
+  background-color: #283593 !important;
+}
+
+.app-sidenav .mat-mdc-list-item-title,
+.app-sidenav [matListItemTitle],
+.app-sidenav .mdc-list-item__primary-text,
+.app-sidenav .mat-mdc-list-item-unscoped-content {
+  color: #ffffff !important;
+}
+
+.app-sidenav .mat-mdc-list-item {
+  --mdc-list-list-item-label-text-color: #ffffff !important;
+  --mdc-list-list-item-focus-label-text-color: #ffffff !important;
+  --mdc-list-list-item-hover-label-text-color: #ffffff !important;
+}
+

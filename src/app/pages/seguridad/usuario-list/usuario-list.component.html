@@ -1,0 +1,176 @@
+<div class="page-header">
+  <div class="header-titles">
+    <div class="header-icon-wrapper">
+      <mat-icon class="header-icon">admin_panel_settings</mat-icon>
+    </div>
+    <div>
+      <h1 class="page-title">Gestión de Usuarios y Accesos</h1>
+      <p class="page-subtitle">
+        Administración de usuarios del sistema, creación de cuentas y asignación de roles y privilegios.
+      </p>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    @if (auth.hasPermission('USUARIO_CREATE')) {
+      <button mat-raised-button color="primary" class="btn-create" (click)="abrirDialogoCrear()">
+        <mat-icon>person_add</mat-icon>
+        <span>Nuevo Usuario</span>
+      </button>
+    }
+  </div>
+</div>
+
+<mat-card class="table-card">
+  <!-- Barra de Filtro / Búsqueda -->
+  <div class="filter-bar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar por usuario, nombre, email o rol...</mat-label>
+      <input matInput [(ngModel)]="filtro" placeholder="Escriba para filtrar en tiempo real" autocomplete="off" />
+      <mat-icon matPrefix>search</mat-icon>
+      @if (filtro) {
+        <button mat-icon-button matSuffix (click)="filtro = ''">
+          <mat-icon>clear</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+
+    <div class="stats-badge">
+      <mat-icon>people</mat-icon>
+      <span>{{ usuariosFiltrados.length }} usuarios encontrados</span>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="48" />
+      <p class="loading-text">Cargando usuarios y roles del sistema...</p>
+    </div>
+  } @else {
+    <div class="table-container">
+      <table mat-table [dataSource]="usuariosFiltrados" class="user-table">
+
+        <!-- Columna ID -->
+        <ng-container matColumnDef="idUsuario">
+          <th mat-header-cell *matHeaderCellDef class="th-id">ID</th>
+          <td mat-cell *matCellDef="let u" class="td-id">#{{ u.idUsuario }}</td>
+        </ng-container>
+
+        <!-- Columna Usuario -->
+        <ng-container matColumnDef="username">
+          <th mat-header-cell *matHeaderCellDef>Usuario</th>
+          <td mat-cell *matCellDef="let u">
+            <div class="username-cell">
+              <div class="avatar-badge">
+                {{ u.username.charAt(0).toUpperCase() }}
+              </div>
+              <div>
+                <span class="user-login">@{{ u.username }}</span>
+                <span class="user-created">Creado: {{ u.creadoEn | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Columna Nombre Completo -->
+        <ng-container matColumnDef="nombreCompleto">
+          <th mat-header-cell *matHeaderCellDef>Nombre Completo</th>
+          <td mat-cell *matCellDef="let u" class="td-name">
+            <strong>{{ u.nombres || '-' }} {{ u.apellidos || '' }}</strong>
+          </td>
+        </ng-container>
+
+        <!-- Columna Email -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Correo Electrónico</th>
+          <td mat-cell *matCellDef="let u" class="td-email">
+            @if (u.email) {
+              <div class="email-wrapper">
+                <mat-icon class="inline-icon">email</mat-icon>
+                <span>{{ u.email }}</span>
+              </div>
+            } @else {
+              <span class="text-muted">Sin correo</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Columna Roles / Accesos -->
+        <ng-container matColumnDef="roles">
+          <th mat-header-cell *matHeaderCellDef>Roles y Accesos Asignados</th>
+          <td mat-cell *matCellDef="let u">
+            <div class="roles-chips-wrapper">
+              @if (u.roles && u.roles.length > 0) {
+                @for (rol of u.roles; track rol) {
+                  <span class="role-chip" [ngClass]="getRoleClass(rol)">
+                    {{ rol }}
+                  </span>
+                }
+              } @else {
+                <span class="no-roles-badge">Sin roles</span>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Columna Estado -->
+        <ng-container matColumnDef="activo">
+          <th mat-header-cell *matHeaderCellDef class="th-center">Estado</th>
+          <td mat-cell *matCellDef="let u" class="td-center">
+            @if (u.activo) {
+              <span class="status-chip active-chip">
+                <span class="status-dot dot-green"></span>
+                <span>Activo</span>
+              </span>
+            } @else {
+              <span class="status-chip inactive-chip">
+                <span class="status-dot dot-gray"></span>
+                <span>Inactivo</span>
+              </span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Columna Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef class="th-actions">Acciones</th>
+          <td mat-cell *matCellDef="let u" class="td-actions">
+            @if (auth.hasPermission('USUARIO_UPDATE')) {
+              <!-- Botón Dar Acceso / Gestionar Roles -->
+              <button mat-mini-fab color="primary" class="action-fab-key"
+                      (click)="abrirDialogoAccesos(u)"
+                      matTooltip="Gestionar Accesos / Roles">
+                <mat-icon>vpn_key</mat-icon>
+              </button>
+
+              <!-- Botón Editar Datos -->
+              <button mat-icon-button color="accent"
+                      (click)="abrirDialogoEditar(u)"
+                      matTooltip="Editar información">
+                <mat-icon>edit</mat-icon>
+              </button>
+
+              <!-- Botón Cambiar Estado -->
+              <button mat-icon-button [color]="u.activo ? 'warn' : 'primary'"
+                      (click)="toggleEstado(u)"
+                      [matTooltip]="u.activo ? 'Desactivar usuario' : 'Activar usuario'">
+                <mat-icon>{{ u.activo ? 'block' : 'check_circle' }}</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="user-row"></tr>
+      </table>
+
+      @if (usuariosFiltrados.length === 0) {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">search_off</mat-icon>
+          <h3>No se encontraron usuarios</h3>
+          <p>No existen registros que coincidan con el término "{{ filtro }}".</p>
+        </div>
+      }
+    </div>
+  }
+</mat-card>

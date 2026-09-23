@@ -1,0 +1,42 @@
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a237e;
+  padding: 16px 24px 8px;
+  margin: 0;
+}
+
+.dialog-content {
+  padding: 16px 24px;
+  min-width: 520px;
+  max-width: 600px;
+}
+
+.user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.form-col {
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.dialog-actions {
+  padding: 12px 24px 16px;
+  gap: 8px;
+}

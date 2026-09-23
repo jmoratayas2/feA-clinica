@@ -1,0 +1,95 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon color="primary">admin_panel_settings</mat-icon>
+  <span>Gestión de Accesos y Roles</span>
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <!-- Tarjeta de información del usuario -->
+  <div class="user-card">
+    <div class="user-avatar">
+      <mat-icon>account_circle</mat-icon>
+    </div>
+    <div class="user-details">
+      <span class="user-name">{{ usuario.nombres }} {{ usuario.apellidos }}</span>
+      <span class="user-meta"><strong>Usuario:</strong> @{{ usuario.username }} &bull; <strong>Email:</strong> {{ usuario.email }}</span>
+    </div>
+  </div>
+
+  <mat-divider class="my-3" />
+
+  <!-- Sección de Roles Actuales -->
+  <div class="section-container">
+    <h3 class="section-title">
+      <mat-icon class="title-icon">verified_user</mat-icon>
+      <span>Roles / Accesos Asignados Actualmente</span>
+    </h3>
+
+    @if (usuario.roles && usuario.roles.length > 0) {
+      <div class="roles-chip-list">
+        @for (rol of usuario.roles; track rol) {
+          <div class="role-badge">
+            <mat-icon class="badge-icon">security</mat-icon>
+            <span class="badge-name">{{ rol }}</span>
+            <button mat-icon-button class="btn-remove" (click)="revocarAcceso(rol)" [disabled]="loading" matTooltip="Revocar rol">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-roles">
+        <mat-icon>warning_amber</mat-icon>
+        <span>Este usuario no tiene ningún rol ni acceso asignado.</span>
+      </div>
+    }
+  </div>
+
+  <mat-divider class="my-3" />
+
+  <!-- Sección para Asignar Nuevo Rol / Acceso -->
+  <div class="section-container">
+    <h3 class="section-title">
+      <mat-icon class="title-icon">add_moderator</mat-icon>
+      <span>Dar Nuevo Acceso (Asignar Rol)</span>
+    </h3>
+
+    @if (rolesDisponiblesParaAsignar.length > 0) {
+      <div class="assign-row">
+        <mat-form-field appearance="outline" class="assign-select">
+          <mat-label>Seleccione el rol a asignar</mat-label>
+          <mat-select [(ngModel)]="selectedRolId" [disabled]="loading">
+            @for (r of rolesDisponiblesParaAsignar; track r.idRol) {
+              <mat-option [value]="r.idRol">
+                <strong>{{ r.nombre }}</strong> &mdash; {{ r.descripcion }}
+              </mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix>badge</mat-icon>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" class="btn-assign" (click)="asignarAcceso()" [disabled]="!selectedRolId || loading">
+          <mat-icon>add</mat-icon>
+          <span>Asignar Acceso</span>
+        </button>
+      </div>
+    } @else {
+      <div class="all-assigned-msg">
+        <mat-icon color="primary">check_circle</mat-icon>
+        <span>El usuario ya cuenta con todos los roles disponibles en el sistema.</span>
+      </div>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="36" />
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-raised-button color="primary" (click)="cerrar()">
+    <mat-icon>check</mat-icon>
+    <span>Listo / Cerrar</span>
+  </button>
+</mat-dialog-actions>
