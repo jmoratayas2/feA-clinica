@@ -5,7 +5,13 @@
 
 <div class="cards-grid">
   @for (card of visibleCards; track card.label) {
-    <mat-card class="module-card" [style.border-top-color]="card.color">
+    <mat-card class="module-card"
+              [style.border-top-color]="card.color"
+              (click)="navigateTo(card.route)"
+              (keydown.enter)="navigateTo(card.route)"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'Ir al módulo de ' + card.label">
       <mat-card-content class="card-content">
         <div class="card-icon-wrap" [style.background-color]="card.color + '1A'">
           <mat-icon [style.color]="card.color">{{ card.icon }}</mat-icon>
