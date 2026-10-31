@@ -30,6 +30,9 @@
           <div class="role-badge">
             <mat-icon class="badge-icon">security</mat-icon>
             <span class="badge-name">{{ rol }}</span>
+            <button mat-icon-button class="btn-tune" (click)="configurarPermisosRol(rol)" [disabled]="loading" matTooltip="Configurar permisos (qué puede hacer este rol)">
+              <mat-icon>tune</mat-icon>
+            </button>
             <button mat-icon-button class="btn-remove" (click)="revocarAcceso(rol)" [disabled]="loading" matTooltip="Revocar rol">
               <mat-icon>cancel</mat-icon>
             </button>

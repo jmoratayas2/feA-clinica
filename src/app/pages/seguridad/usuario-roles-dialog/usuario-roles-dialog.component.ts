@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,10 +9,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Usuario } from '../../../models/usuario/usuario.model';
 import { Rol } from '../../../models/rol/rol.model';
 import { UsuarioService } from '../../../services/usuario.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { RolPermisosDialogComponent } from '../rol-permisos-dialog/rol-permisos-dialog.component';
 
 export interface UsuarioRolesDialogData {
   usuario: Usuario;
@@ -32,7 +34,8 @@ export interface UsuarioRolesDialogData {
     MatIconModule,
     MatChipsModule,
     MatDividerModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTooltipModule
   ],
   templateUrl: './usuario-roles-dialog.component.html',
   styleUrl: './usuario-roles-dialog.component.css'
@@ -41,6 +44,7 @@ export class UsuarioRolesDialogComponent implements OnInit {
   dialogRef = inject(MatDialogRef<UsuarioRolesDialogComponent>);
   private usuarioService = inject(UsuarioService);
   private notify = inject(NotificationService);
+  private dialog = inject(MatDialog);
 
   usuario!: Usuario;
   todosRoles: Rol[] = [];
@@ -105,6 +109,16 @@ export class UsuarioRolesDialogComponent implements OnInit {
         const msg = err.error?.message || 'No se pudo revocar el rol';
         this.notify.error('Error', msg);
       }
+    });
+  }
+
+  configurarPermisosRol(nombreRol: string): void {
+    const rol = this.todosRoles.find(r => r.nombre === nombreRol);
+    if (!rol) return;
+    this.dialog.open(RolPermisosDialogComponent, {
+      width: '820px',
+      maxWidth: '96vw',
+      data: { rol }
     });
   }
 
