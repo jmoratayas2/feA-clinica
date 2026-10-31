@@ -355,19 +355,19 @@ export class CitaListComponent implements OnInit {
 
   cargarCatalogos(): void {
     if (this.auth.hasPermission('PACIENTE_READ') && this.pacientes.length === 0) {
-      this.pacService.search({ page: 0, size: 100 }).subscribe({
-        next: (res: any) => (this.pacientes = res.data),
+      this.pacService.search({ page: 0, size: 200 }).subscribe({
+        next: (res: any) => (this.pacientes = res.data || res),
         error: (e: any) => console.error('Error cargando pacientes', e)
       });
     }
     if (this.auth.hasPermission('MEDICO_READ') && this.medicos.length === 0) {
-      this.catService.listarMedicos(false).subscribe({
+      this.catService.listarMedicos(true).subscribe({
         next: (res) => (this.medicos = res),
         error: (e) => console.error('Error cargando medicos', e)
       });
     }
     if (this.auth.hasPermission('CLINICA_READ') && this.clinicas.length === 0) {
-      this.catService.listarClinicas(false).subscribe({
+      this.catService.listarClinicas(true).subscribe({
         next: (res) => (this.clinicas = res),
         error: (e) => console.error('Error cargando clinicas', e)
       });
@@ -408,6 +408,9 @@ export class CitaListComponent implements OnInit {
   }
 
   abrirModalCrear(): void {
+    if (this.medicos.length === 0 || this.clinicas.length === 0 || this.pacientes.length === 0) {
+      this.cargarCatalogos();
+    }
     const ref = this.dialog.open(CitaFormDialogComponent, {
       width: '600px',
       data: {

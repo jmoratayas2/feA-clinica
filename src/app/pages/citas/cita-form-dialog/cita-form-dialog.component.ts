@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, inject } from '@angular/core';
+import { Component, Inject, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -7,10 +7,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterModule } from '@angular/router';
+
 import { Cita, CitaRequest } from '../../../models/clinica-operaciones/operaciones.model';
 import { Clinica } from '../../../models/clinica/clinica.model';
 import { Medico } from '../../../models/medico/medico.model';
 import { Paciente } from '../../../models/paciente/paciente.model';
+import { CatalogosService } from '../../../services/catalogos.service';
+import { PacienteService } from '../../../services/paciente.service';
 
 export interface CitaFormDialogData {
   cita?: Cita | null;
@@ -25,6 +29,7 @@ export interface CitaFormDialogData {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
@@ -46,6 +51,9 @@ export interface CitaFormDialogData {
             <mat-option *ngFor="let p of data.pacientes" [value]="p.id">
               {{ p.nombres }} {{ p.apellidos }} (ID: {{ p.numeroIdentificacion || 'N/A' }})
             </mat-option>
+            <mat-option *ngIf="data.pacientes.length === 0" disabled>
+              No hay pacientes registrados en el sistema
+            </mat-option>
           </mat-select>
           <mat-error *ngIf="form.get('pacienteId')?.hasError('required')">El paciente es obligatorio</mat-error>
         </mat-form-field>
@@ -55,9 +63,15 @@ export interface CitaFormDialogData {
             <mat-label>Médico</mat-label>
             <mat-select formControlName="medicoId">
               <mat-option *ngFor="let m of data.medicos" [value]="m.id">
-                Dr(a). {{ m.nombres }} {{ m.apellidos }}
+                Dr(a). {{ m.nombres }} {{ m.apellidos }} (Colegiado: {{ m.numeroColegiado }})
+              </mat-option>
+              <mat-option *ngIf="data.medicos.length === 0" disabled>
+                ⚠️ No hay médicos en el catálogo
               </mat-option>
             </mat-select>
+            <mat-hint *ngIf="data.medicos.length === 0" class="text-danger-hint">
+              Debe registrar al profesional en el módulo de <b>Médicos</b>
+            </mat-hint>
             <mat-error *ngIf="form.get('medicoId')?.hasError('required')">El médico es obligatorio</mat-error>
           </mat-form-field>
 
@@ -66,6 +80,9 @@ export interface CitaFormDialogData {
             <mat-select formControlName="clinicaId">
               <mat-option *ngFor="let c of data.clinicas" [value]="c.id">
                 {{ c.nombre }}
+              </mat-option>
+              <mat-option *ngIf="data.clinicas.length === 0" disabled>
+                No hay clínicas registradas
               </mat-option>
             </mat-select>
             <mat-error *ngIf="form.get('clinicaId')?.hasError('required')">La clínica es obligatoria</mat-error>
@@ -133,6 +150,10 @@ export interface CitaFormDialogData {
       flex: 1;
       margin-bottom: 12px;
     }
+    .text-danger-hint {
+      color: #d97706;
+      font-size: 0.75rem;
+    }
     .dialog-actions {
       padding: 16px 24px;
       border-top: 1px solid #e2e8f0;
@@ -141,6 +162,9 @@ export interface CitaFormDialogData {
 })
 export class CitaFormDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private catService = inject(CatalogosService);
+  private pacService = inject(PacienteService);
+  private cdr = inject(ChangeDetectorRef);
   dialogRef = inject(MatDialogRef<CitaFormDialogComponent>);
 
   form!: FormGroup;
@@ -151,6 +175,14 @@ export class CitaFormDialogComponent implements OnInit {
   ngOnInit(): void {
     this.isEdit = !!this.data.cita;
     const c = this.data.cita;
+
+    // Inicializar arreglos si vienen nulos
+    if (!this.data.pacientes) this.data.pacientes = [];
+    if (!this.data.medicos) this.data.medicos = [];
+    if (!this.data.clinicas) this.data.clinicas = [];
+
+    // Auto-recuperar catálogos si no fueron precargados por el padre
+    this.verificarYRecuperarCatalogos();
 
     // Helper format for datetime-local
     const now = new Date();
@@ -167,6 +199,38 @@ export class CitaFormDialogComponent implements OnInit {
       motivo: [c?.motivo || '', [Validators.required, Validators.maxLength(255)]],
       observaciones: [c?.observaciones || '', [Validators.maxLength(500)]]
     });
+  }
+
+  private verificarYRecuperarCatalogos(): void {
+    if (this.data.medicos.length === 0) {
+      this.catService.listarMedicos(true).subscribe({
+        next: (medicos) => {
+          this.data.medicos = medicos;
+          this.cdr.markForCheck();
+        },
+        error: (err) => console.warn('No se pudieron precargar médicos en diálogo:', err)
+      });
+    }
+
+    if (this.data.clinicas.length === 0) {
+      this.catService.listarClinicas(true).subscribe({
+        next: (clinicas) => {
+          this.data.clinicas = clinicas;
+          this.cdr.markForCheck();
+        },
+        error: (err) => console.warn('No se pudieron precargar clínicas en diálogo:', err)
+      });
+    }
+
+    if (this.data.pacientes.length === 0) {
+      this.pacService.search({ page: 0, size: 200 }).subscribe({
+        next: (res: any) => {
+          this.data.pacientes = res.data || res;
+          this.cdr.markForCheck();
+        },
+        error: (err) => console.warn('No se pudieron precargar pacientes en diálogo:', err)
+      });
+    }
   }
 
   onSubmit(): void {
