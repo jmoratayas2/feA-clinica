@@ -14,10 +14,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { CatalogosService } from '../../../services/catalogos.service';
+import { UsuarioService } from '../../../services/usuario.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Medico, MedicoRequest } from '../../../models/medico/medico.model';
-import { MedicoFormDialogComponent } from '../medico-form-dialog/medico-form-dialog.component';
+import { MedicoFormDialogComponent, MedicoFormDialogResult } from '../medico-form-dialog/medico-form-dialog.component';
 
 @Component({
   selector: 'app-medico-list',
@@ -244,6 +245,7 @@ export class MedicoListComponent implements OnInit {
   private notify = inject(NotificationService);
   private dialog = inject(MatDialog);
   private cdr = inject(ChangeDetectorRef);
+  private usuarioService = inject(UsuarioService);
 
   medicos: Medico[] = [];
   filtro = '';
@@ -290,16 +292,45 @@ export class MedicoListComponent implements OnInit {
 
   abrirModalCrear(): void {
     const ref = this.dialog.open(MedicoFormDialogComponent, {
-      width: '540px',
+      width: '560px',
       data: { medico: null }
     });
 
-    ref.afterClosed().subscribe((req: MedicoRequest) => {
-      if (!req) return;
+    ref.afterClosed().subscribe((res: any) => {
+      if (!res) return;
+      const req: MedicoRequest = res.medicoRequest || res;
       this.service.crearMedico(req).subscribe({
-        next: () => {
-          this.notify.success('Médico registrado con éxito');
-          this.cargarDatos();
+        next: (medicoCreado) => {
+          if (res.crearUsuario && res.usuarioData) {
+            this.usuarioService.crear(res.usuarioData).subscribe({
+              next: (nuevoUsuario) => {
+                // Asignar rol MEDICO si existe
+                this.usuarioService.listarRoles().subscribe({
+                  next: (roles) => {
+                    const rolMedico = roles.find(r => r.nombre.toUpperCase().includes('MEDIC'));
+                    if (rolMedico) {
+                      this.usuarioService.asignarRol(nuevoUsuario.idUsuario, rolMedico.idRol).subscribe();
+                    }
+                  }
+                });
+                this.notify.success(
+                  'Médico Registrado',
+                  `Dr(a). ${medicoCreado.nombres} ${medicoCreado.apellidos} registrado. Usuario @${res.usuarioData.username} creado con acceso al sistema.`
+                );
+                this.cargarDatos();
+              },
+              error: (errUser) => {
+                this.notify.warning(
+                  'Médico Registrado',
+                  `Médico registrado en la clínica, pero ocurrió un detalle al crear su usuario: ${errUser.error?.message || errUser.message}`
+                );
+                this.cargarDatos();
+              }
+            });
+          } else {
+            this.notify.success('Médico registrado con éxito');
+            this.cargarDatos();
+          }
         },
         error: (err) => this.notify.error('Error al registrar médico', err.error?.message || err.message)
       });
@@ -308,12 +339,13 @@ export class MedicoListComponent implements OnInit {
 
   abrirModalEditar(m: Medico): void {
     const ref = this.dialog.open(MedicoFormDialogComponent, {
-      width: '540px',
+      width: '560px',
       data: { medico: m }
     });
 
-    ref.afterClosed().subscribe((req: MedicoRequest) => {
-      if (!req || !m.id) return;
+    ref.afterClosed().subscribe((res: any) => {
+      if (!res || !m.id) return;
+      const req: MedicoRequest = res.medicoRequest || res;
       this.service.actualizarMedico(m.id, req).subscribe({
         next: () => {
           this.notify.success('Médico actualizado con éxito');

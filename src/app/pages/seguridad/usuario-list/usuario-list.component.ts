@@ -16,6 +16,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { UsuarioService } from '../../../services/usuario.service';
+import { CatalogosService } from '../../../services/catalogos.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Usuario, UsuarioRequest } from '../../../models/usuario/usuario.model';
@@ -45,6 +46,7 @@ import { UsuarioRolesDialogComponent } from '../usuario-roles-dialog/usuario-rol
 })
 export class UsuarioListComponent implements OnInit {
   private usuarioService = inject(UsuarioService);
+  private catalogosService = inject(CatalogosService);
   auth = inject(AuthService);
   private notify = inject(NotificationService);
   private dialog = inject(MatDialog);
@@ -123,6 +125,20 @@ export class UsuarioListComponent implements OnInit {
             // Asignar rol inicial
             this.usuarioService.asignarRol(nuevoUsuario.idUsuario, res.initialRolId).subscribe({
               next: () => {
+                // Si el rol es MEDICO, sincronizar automáticamente en el catálogo de médicos de la clínica
+                const rolObj = this.rolesDisponibles.find(r => r.idRol === res.initialRolId);
+                if (rolObj && rolObj.nombre.toUpperCase().includes('MEDIC')) {
+                  this.catalogosService.crearMedico({
+                    nombres: nuevoUsuario.nombres || nuevoUsuario.username,
+                    apellidos: nuevoUsuario.apellidos || 'Médico',
+                    numeroColegiado: `COL-${nuevoUsuario.idUsuario}-${Math.floor(1000 + Math.random() * 9000)}`,
+                    correo: nuevoUsuario.email || undefined,
+                    telefono: 'N/A'
+                  }).subscribe({
+                    next: () => console.log('Ficha de médico sincronizada en la clínica'),
+                    error: (e) => console.warn('Aviso: médico no sincronizado en clinicaBK:', e)
+                  });
+                }
                 this.notify.success('Usuario Creado', `Usuario @${nuevoUsuario.username} creado exitosamente con su rol inicial.`);
                 this.cargarDatos();
               },
