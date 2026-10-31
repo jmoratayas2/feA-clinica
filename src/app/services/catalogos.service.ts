@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Clinica, ClinicaRequest } from '../models/clinica/clinica.model';
 import { Especialidad, EspecialidadRequest } from '../models/especialidad/especialidad.model';
-import { Medico, MedicoRequest } from '../models/medico/medico.model';
+import { Medico, MedicoRequest, MedicoClinica, MedicoClinicaRequest } from '../models/medico/medico.model';
 import { Medicamento, MedicamentoRequest } from '../models/medicamento/medicamento.model';
 import { TipoExamen, TipoExamenRequest } from '../models/examen/examen.model';
 
@@ -141,5 +141,23 @@ export class CatalogosService {
 
   activarTipoExamen(id: number): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/tipos-examen/${id}/activar`, {});
+  }
+
+  // ── Médico ↔ Clínica (Sedes) ──────────────────────────────────────────────
+  asignarMedicoClinica(medicoId: number, req: MedicoClinicaRequest): Observable<MedicoClinica> {
+    return this.http.post<MedicoClinica>(`${this.baseUrl}/medicos/${medicoId}/clinicas`, req);
+  }
+
+  listarClinicasDeMedico(medicoId: number, incluirInactivos: boolean = false): Observable<MedicoClinica[]> {
+    const params = new HttpParams().set('incluirInactivos', incluirInactivos.toString());
+    return this.http.get<MedicoClinica[]>(`${this.baseUrl}/medicos/${medicoId}/clinicas`, { params });
+  }
+
+  desactivarMedicoClinica(relacionId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/medicos/clinicas-relaciones/${relacionId}`);
+  }
+
+  activarMedicoClinica(relacionId: number): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/medicos/clinicas-relaciones/${relacionId}/activar`, {});
   }
 }

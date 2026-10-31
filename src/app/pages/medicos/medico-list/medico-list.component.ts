@@ -19,6 +19,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Medico, MedicoRequest } from '../../../models/medico/medico.model';
 import { MedicoFormDialogComponent, MedicoFormDialogResult } from '../medico-form-dialog/medico-form-dialog.component';
+import { MedicoClinicasDialogComponent } from '../medico-clinicas-dialog/medico-clinicas-dialog.component';
 
 @Component({
   selector: 'app-medico-list',
@@ -118,6 +119,16 @@ import { MedicoFormDialogComponent, MedicoFormDialogResult } from '../medico-for
                   (click)="abrirModalEditar(m)"
                 >
                   <mat-icon>edit</mat-icon>
+                </button>
+
+                <button
+                  mat-icon-button
+                  color="accent"
+                  matTooltip="Asignar o Ver Sedes / Clínicas"
+                  *ngIf="auth.hasPermission('MEDICO_UPDATE')"
+                  (click)="abrirModalClinicas(m)"
+                >
+                  <mat-icon>apartment</mat-icon>
                 </button>
 
                 <button
@@ -353,6 +364,19 @@ export class MedicoListComponent implements OnInit {
         },
         error: (err) => this.notify.error('Error al actualizar médico', err.error?.message || err.message)
       });
+    });
+  }
+
+  abrirModalClinicas(m: Medico): void {
+    const ref = this.dialog.open(MedicoClinicasDialogComponent, {
+      width: '720px',
+      data: { medico: m }
+    });
+
+    ref.afterClosed().subscribe((recargar) => {
+      if (recargar) {
+        this.cargarDatos();
+      }
     });
   }
 
